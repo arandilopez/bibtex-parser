@@ -46,6 +46,7 @@ composer require renanbr/bibtex-parser ^2
 ```php
 use RenanBr\BibTexParser\Listener;
 use RenanBr\BibTexParser\Parser;
+use RenanBr\BibTexParser\Processor;
 
 require 'vendor/autoload.php';
 
@@ -57,11 +58,21 @@ $bibtex = <<<BIBTEX
 }
 BIBTEX;
 
-$parser = new Parser();          // Create a Parser
-$listener = new Listener();      // Create and configure a Listener
-$parser->addListener($listener); // Attach the Listener to the Parser
-$parser->parseString($bibtex);   // or parseFile('/path/to/file.bib')
-$entries = $listener->export();  // Get processed data from the Listener
+// Create and configure a Listener
+$listener = new Listener();
+$listener->addProcessor(new Processor\TagNameCaseProcessor(CASE_LOWER));
+// $listener->addProcessor(new Processor\NamesProcessor());
+// $listener->addProcessor(new Processor\KeywordsProcessor());
+// $listener->addProcessor(new Processor\LatexToUnicodeProcessor());
+// ... you can append as many Processors as you want
+
+// Create a Parser and attach the listener
+$parser = new Parser();
+$parser->addListener($listener);
+
+// Parse the content, then read processed data from the Listener
+$parser->parseString($bibtex); // or parseFile('/path/to/file.bib')
+$entries = $listener->export();
 
 print_r($entries);
 ```
